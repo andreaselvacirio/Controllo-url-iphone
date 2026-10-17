@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b70">
+  <title>Controllo URL</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      font-family: -apple-system, sans-serif;
+      background: #f1f5fb;
+      color: #172b4d;
+    }
+    main {
+      max-width: 480px;
+      margin: 0 auto;
+      background: white;
+      padding: 22px;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px #0001;
+    }
+    h1 { margin-top: 0; }
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: 600;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 7px;
+      border-radius: 9px;
+      font-size: 16px;
+    }
+    input, select {
+      border: 1px solid #bdc9da;
+      background: white;
+    }
+    button {
+      border: 0;
+      background: #2059a5;
+      color: white;
+      font-weight: 600;
+      margin-top: 22px;
+    }
+    #risultato {
+      overflow-wrap: anywhere;
+      margin-top: 18px;
+    }
+    a { color: #2059a5; }
+    .nota { color: #5b6880; font-size: 14px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Controllo URL</h1>
+  <p class="nota">Componi e apri un indirizzo web.</p>
+
+  <label for="base">Indirizzo di partenza</label>
+  <input id="base" type="url"
+    value="https://maina.web.cern.ch/" required>
+
+  <label for="tipo">Tipo di caratteri</label>
+  <select id="tipo">
+    <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZ">Maiuscole</option>
+    <option value="abcdefghijklmnopqrstuvwxyz">Minuscole</option>
+    <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz">Maiuscole e minuscole</option>
+    <option value="0123456789">Numeri</option>
+    <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789">Lettere e numeri</option>
+  </select>
+
+  <label for="lunghezza">Lunghezza del codice</label>
+  <select id="lunghezza">
+    <option value="2">2 caratteri</option>
+    <option value="3">3 caratteri</option>
+  </select>
+
+  <label for="codice">Codice da provare</label>
+  <input id="codice" value="aa" maxlength="3"
+    autocapitalize="off" autocomplete="off">
+
+  <button id="apri">Componi e apri URL</button>
+
+  <div id="risultato" aria-live="polite"></div>
+</main>
+
+<script>
+  const base = document.getElementById("base");
+  const tipo = document.getElementById("tipo");
+  const lunghezza = document.getElementById("lunghezza");
+  const codice = document.getElementById("codice");
+  const risultato = document.getElementById("risultato");
+
+  document.getElementById("apri").addEventListener("click", () => {
+    const indirizzo = base.value.trim();
+    const valore = codice.value.trim();
+    const caratteri = tipo.value;
+    const n = Number(lunghezza.value);
+
+    try {
+      const url = new URL(indirizzo);
+
+      if (!["http:", "https:"].includes(url.protocol)) {
+        throw new Error();
+      }
+
+      if (valore.length !== n ||
+          [...valore].some(c => !caratteri.includes(c))) {
+        risultato.textContent =
+          "Codice non valido per le opzioni selezionate.";
+        return;
+      }
+
+      url.pathname = url.pathname.replace(/\/?$/, "/")
+        + valore;
+
+      const link = document.createElement("a");
+      link.href = url.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = url.href;
+
+      risultato.replaceChildren(
+        document.createTextNode("Indirizzo composto: "),
+        link
+      );
+      link.click();
+    } catch {
+      risultato.textContent =
+        "Inserisci un indirizzo web valido.";
+    }
+  });
+</script>
+</body>
+</html>
